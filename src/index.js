@@ -31,6 +31,10 @@ const API_URL = `https://pixabay.com/api/?key=${API_KEY}`;
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
+  if(input.value.length < 3){
+    Notiflix.Notify.failure('Give us longet description')
+  }
+  else {
   gallery.innerHTML = '';
   loadMoreBtn.style.display = 'none';
   currentPage = 1;
@@ -55,7 +59,7 @@ form.addEventListener('submit', async (e) => {
     console.error(error);
     Notiflix.Notify.failure('Something wrong');
   }
-});
+}});
 
 
 loadMoreBtn.addEventListener('click', async () => {
