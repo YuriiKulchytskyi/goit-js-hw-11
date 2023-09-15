@@ -2,6 +2,8 @@ import axios from "axios";
 import Notiflix from "notiflix";
 
 
+
+
 const form = document.querySelector('form');
 const input = document.querySelector('input');
 const gallery = document.querySelector('.gallery');
@@ -36,7 +38,7 @@ form.addEventListener('submit', async (e) => {
   const keyWord = input.value;
 
   try {
-    const resp = await axios.get(`${API_URL}&q=${keyWord}&image_type=photo&orientation=horizontal&safesearch=true&per_page=${photosPerPage}&page=${thisPage}`);
+    const resp = await axios.get(`${API_URL}&q=${keyWord}&image_type=photo&orientation=horizontal&safesearch=false&per_page=${photosPerPage}&page=${thisPage}`);
     const data = resp.data;
 
     if (data.hits.length === 0) {
@@ -48,10 +50,6 @@ form.addEventListener('submit', async (e) => {
       if (data.hits.length > 0) {
         loadMoreBtn.style.display = 'block';
       }
-      const images = document.querySelectorAll('.gallery img');
-      const lightbox = new SimpleLightbox(images);
-
-
     }
   } catch (error) {
     console.error(error);
@@ -66,14 +64,14 @@ loadMoreBtn.addEventListener('click', async () => {
   const keyWord = input.value;
 
   try {
-    const resp = await axios.get(`${API_URL}&q=${keyWord}&image_type=photo&orientation=horizontal&safesearch=true&per_page=${photosPerPage}&page=${thisPage}`);
+    const resp = await axios.get(`${API_URL}&q=${keyWord}&image_type=photo&orientation=horizontal&safesearch=false&per_page=${photosPerPage}&page=${thisPage}`);
     const data = resp.data;
 
     if (data.hits.length > 0) {
       gallery.append(createCards(data.hits));
     } else {
-      loadMoreBtn.style.display = 'none';
       Notiflix.Notify.info("We're sorry, but you've reached the end of search results.");
+      loadMoreBtn.style.display = 'none';
     }
   } catch (error) {
     console.error(error);
@@ -84,7 +82,6 @@ loadMoreBtn.addEventListener('click', async () => {
 
 async function createCards(arr) {
   await arr.forEach(element => {
-    const link = document.createElement('a');
     const cardImage = document.createElement('img');
     cardImage.src = element.webformatURL;
     cardImage.alt = element.tags;
@@ -117,8 +114,7 @@ async function createCards(arr) {
     const hitContainer = document.createElement('div');
     hitContainer.style.display = 'flex';
     hitContainer.style.flexDirection = 'column';
-    link.append(cardImage)
-    hitContainer.append(link);
+    hitContainer.append(cardImage);
     hitContainer.append(descriptionList);
 
     gallery.append(hitContainer);
@@ -127,4 +123,3 @@ async function createCards(arr) {
 
   });
 }
-
