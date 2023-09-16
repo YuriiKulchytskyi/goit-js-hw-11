@@ -39,7 +39,7 @@ form.addEventListener('submit', async (e) => {
   } else {
     gallery.innerHTML = '';
     loadMoreBtn.style.display = 'none';
-    currentPage = 1;
+    thisPage = 1;
 
     const keyWord = input.value;
 
