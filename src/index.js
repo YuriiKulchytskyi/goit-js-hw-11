@@ -1,5 +1,5 @@
-import axios from "axios";
 import Notiflix from "notiflix";
+import { searchImages } from "./axios"; // Import the searchImages function
 
 
 
@@ -29,38 +29,37 @@ form.style.gap = '1em';
 const API_KEY = '39406634-bdefc0ba04eb08cccc787049c';
 const API_URL = `https://pixabay.com/api/?key=${API_KEY}`;
 
+
+
+
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
-  if(input.value.length < 3){
-    Notiflix.Notify.failure('Give us longet description')
-  }
-  else {
-  gallery.innerHTML = '';
-  loadMoreBtn.style.display = 'none';
-  currentPage = 1;
+  if (input.value.length < 3) {
+    Notiflix.Notify.failure('Give us a longer description');
+  } else {
+    gallery.innerHTML = '';
+    loadMoreBtn.style.display = 'none';
+    currentPage = 1;
 
-  const keyWord = input.value;
+    const keyWord = input.value;
 
-  try {
-    const resp = await axios.get(`${API_URL}&q=${keyWord}&image_type=photo&orientation=horizontal&safesearch=false&per_page=${photosPerPage}&page=${thisPage}`);
-    const data = resp.data;
+    try {
+      const data = await searchImages(keyWord, thisPage, photosPerPage); // Use the imported function
+      if (data.hits.length === 0) {
+        Notiflix.Notify.failure(`No matches with "${keyWord}" found`);
+      } else {
+        Notiflix.Notify.success(`${data.totalHits} matches found`);
+        createCards(data.hits);
 
-    if (data.hits.length === 0) {
-      Notiflix.Notify.failure(`No matches with "${keyWord}" found`);
-    } else {
-      Notiflix.Notify.success(`${data.totalHits} matches found`);
-      createCards(data.hits);
-
-      if (data.hits.length > 0) {
-        loadMoreBtn.style.display = 'block';
+        if (data.hits.length > 0) {
+          loadMoreBtn.style.display = 'block';
+        }
       }
+    } catch (error) {
+      Notiflix.Notify.failure('Something went wrong');
     }
-  } catch (error) {
-    console.error(error);
-    Notiflix.Notify.failure('Something wrong');
   }
-}});
-
+});
 
 loadMoreBtn.addEventListener('click', async () => {
   thisPage++;
@@ -68,9 +67,7 @@ loadMoreBtn.addEventListener('click', async () => {
   const keyWord = input.value;
 
   try {
-    const resp = await axios.get(`${API_URL}&q=${keyWord}&image_type=photo&orientation=horizontal&safesearch=false&per_page=${photosPerPage}&page=${thisPage}`);
-    const data = resp.data;
-
+    const data = await searchImages(keyWord, thisPage, photosPerPage); // Use the imported function
     if (data.hits.length > 0) {
       gallery.append(createCards(data.hits));
     } else {
@@ -78,11 +75,11 @@ loadMoreBtn.addEventListener('click', async () => {
       loadMoreBtn.style.display = 'none';
     }
   } catch (error) {
-    console.error(error);
-    Notiflix.Notify.failure('Something wrong');
+    Notiflix.Notify.failure('Something went wrong');
   }
+});
 
-})
+
 
 async function createCards(arr) {
   await arr.forEach(element => {
