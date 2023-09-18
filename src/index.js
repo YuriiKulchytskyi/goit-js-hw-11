@@ -35,7 +35,7 @@ form.addEventListener('submit', async (e) => {
     Notiflix.Notify.failure('Give us a longer description');
   } else {
     gallery.innerHTML = '';
-    thisPage = 1;
+    currentPage = 1;
 
     const keyWord = input.value;
 
