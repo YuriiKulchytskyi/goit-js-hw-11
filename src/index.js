@@ -1,5 +1,5 @@
 import Notiflix from "notiflix";
-import { searchImages } from "./axios"; // Import the searchImages function
+import { searchImages } from "./axios";
 
 
 
@@ -8,12 +8,10 @@ const form = document.querySelector('form');
 const input = document.querySelector('input');
 const gallery = document.querySelector('.gallery');
 
-const loadMoreBtn = document.querySelector('.loadBtn');
-
-
 let thisPage = 1;
-
+let totalPageCount = 0;
 const photosPerPage = 40;
+let noMorePhotos = false;
 
 gallery.style.display = 'grid';
 gallery.style.gridTemplateColumns = 'repeat(4, 1fr)';
@@ -26,56 +24,58 @@ form.style.justifyContent = 'center';
 form.style.alignItems = 'center';
 form.style.gap = '1em';
 
-const API_KEY = '39406634-bdefc0ba04eb08cccc787049c';
-const API_URL = `https://pixabay.com/api/?key=${API_KEY}`;
+
 
 
 
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
-  if (input.value.length < 3) {
+  if (input.value.length < 3 || input.value.trim() == ''){
     Notiflix.Notify.failure('Give us a longer description');
   } else {
     gallery.innerHTML = '';
-    loadMoreBtn.style.display = 'none';
-    currentPage = 1;
+    thisPage = 1;
 
     const keyWord = input.value;
 
     try {
-      const data = await searchImages(keyWord, thisPage, photosPerPage); // Use the imported function
-      if (data.hits.length === 0) {
+      const data = await searchImages(keyWord, thisPage, photosPerPage);
+      if (data.totalHits === 0) {
         Notiflix.Notify.failure(`No matches with "${keyWord}" found`);
       } else {
+        totalPageCount = Math.ceil(data.totalHits / photosPerPage);
         Notiflix.Notify.success(`${data.totalHits} matches found`);
         createCards(data.hits);
-
-        if (data.hits.length > 0) {
-          loadMoreBtn.style.display = 'block';
-        }
-      }
+       }
     } catch (error) {
       Notiflix.Notify.failure('Something went wrong');
     }
   }
 });
 
-loadMoreBtn.addEventListener('click', async () => {
-  thisPage++;
-
+window.addEventListener('scroll', async () => {
   const keyWord = input.value;
+  
+  if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+    if (thisPage < totalPageCount) {
+      thisPage++;
 
-  try {
-    const data = await searchImages(keyWord, thisPage, photosPerPage); // Use the imported function
-    if (data.hits.length > 0) {
-      gallery.append(createCards(data.hits));
-    } else {
-      Notiflix.Notify.info("We're sorry, but you've reached the end of search results.");
-      loadMoreBtn.style.display = 'none';
+      try {
+        const data = await searchImages(keyWord, thisPage, photosPerPage);
+        if (data.hits.length > 0) {
+          gallery.append(createCards(data.hits));
+        }
+        
+      } catch (error) {
+        Notiflix.Notify.failure('Something went wrong');
+      }
     }
-  } catch (error) {
-    Notiflix.Notify.failure('Something went wrong');
+    else{
+      noMorePhotos = true;
+      Notiflix.Notify.info('No photos to show');
+    }
+    
   }
 });
 
